@@ -1,0 +1,98 @@
+Étape 1
+1) HashMap, car il est une structure qui fait un lien entre une clé hash, dnas ce cas le mot, et une valeur, dans ce cas le nombre d'occurences.
+
+4) Non, parce qu'il y a beaucoup de lignes sans mots et les characteres majuscule viennent avant les mêmes mots avec des characteres minuscules.
+
+5)
+de 98
+la 51
+police 38
+et 36
+des 33
+
+6)
+de 630
+le 429
+la 370
+du 347
+et 295
+
+7)
+de 30436
+la 12975
+des 11618
+à 11002
+et 10678
+
+8)
+Time to count: 730
+Time to sort: 47
+de 190889
+la 82599
+des 67813
+à 65546
+et 62702
+
+9)
+Time to count: 15865
+Time to sort: 3964
+the 720559
+to 466751
+and 456510
+a 430027
+of 394733
+
+Étape 2
+1)Nom court tp-1a222-01 : hostname -s
+Nom long tp-1a222-01.enst.fr : hostname -f
+Les noms court peuvent être obtenu par le nom de la salle et le numero de l'ordinateur dans la salle
+
+2)
+On peut decouvrir l'ip avec le commande hostname -i
+
+3)
+On peut découvrir l'ip avec le commande ping
+
+4)
+On peut découvir le nom avec le commande nslookup
+
+5)
+Oui, les trois méthode fonctionnent
+
+
+7)
+On peut utiliser echo $((2+5)), expr 2 + 5, ou calc 2+5
+Tous les méthodes peuvent être utilisé sans appuyer plus d'une fois
+sur Entrée
+
+8)
+
+9)
+Si on est déjà connecté à un ordinateur de l'école, on peut faire ssh nom_pc commande,
+et le commande sera executé par l'autre ordinateur.
+
+Étape 3
+1)
+chemin absolu: /cal/homes/cordeiro
+
+3)
+df nom_du_fichier
+Ce fichier est stocké sur l'ordinateur local
+
+4)
+df nom_du_fichier
+Ce fichier est stocké sur le serveur centrale de l'école
+
+9)
+Commande pour copier le fichier:
+	 scp /tmp/cordeiro/local.txt tp-1a222-14:/tmp/cordeiro
+
+10)
+ssh tp-1a222-14 scp /tmp/cordeiro/local.txt tp-1a222-05:/tmp/cordeiro
+
+Étape 4
+3)
+ssh tp-1a222-14 java -jar /tmp/cordeiro/Slave.jar
+
+Étape 5
+
