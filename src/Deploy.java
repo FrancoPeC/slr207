@@ -7,16 +7,14 @@ public class Deploy {
     public static void main(String[] args) {
 	ArrayList<Object> threads = new ArrayList<Object>();
 	ConcurrentLinkedQueue<String> pcs = new ConcurrentLinkedQueue<String>();
-	FileInputStream fs = null;
-	FileOutputStream fos = null;
+	FileReader fs = null;
+	FileWriter fos = null;
 	try{
-	    fs = new FileInputStream("pcs.txt");
-	    InputStreamReader rs = new InputStreamReader(fs);
-	    BufferedReader br = new BufferedReader(rs);
+	    fs = new FileReader("pcs.txt");
+	    BufferedReader br = new BufferedReader(fs);
 
-	    fos = new FileOutputStream("pcSuccess.txt");
-	    OutputStreamWriter ws = new OutputStreamWriter(fos);
-	    BufferedWriter bw = new BufferedWriter(ws);
+	    fos = new FileWriter("pcSuccess.txt");
+	    BufferedWriter bw = new BufferedWriter(fos);
 
 	    String line;
 	    while((line = br.readLine()) != null) {
