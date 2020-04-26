@@ -10,10 +10,10 @@ public class Deploy {
 	FileReader fs = null;
 	FileWriter fos = null;
 	try{
-	    fs = new FileReader("pcs.txt");
+	    fs = new FileReader("tousMachines.txt");
 	    BufferedReader br = new BufferedReader(fs);
 
-	    fos = new FileWriter("pcSuccess.txt");
+	    fos = new FileWriter("deploySuccess.txt");
 	    BufferedWriter bw = new BufferedWriter(fos);
 
 	    String line;

@@ -12,7 +12,7 @@ public class Clean {
 	ArrayList<Object> threads = new ArrayList<Object>();
 	ConcurrentLinkedQueue<String> pcs = new ConcurrentLinkedQueue<String>();
 	try{
-	    FileInputStream fs = new FileInputStream("pcs.txt");
+	    FileInputStream fs = new FileInputStream("tousMachines.txt");
 	    InputStreamReader rs = new InputStreamReader(fs);
 	    BufferedReader br = new BufferedReader(rs);
 
@@ -59,8 +59,6 @@ class ClearSlave extends Thread {
 	try {
 	    ProcessBuilder pb = new ProcessBuilder("ssh", pcName, "rm", "-rf", "/tmp/cordeiro");
 	    Process process = pb.start();
-	    process.waitFor();
-	    process = pb.start();
 	    process.waitFor();
 	}catch(Exception e){}
 	}

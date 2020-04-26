@@ -96,3 +96,11 @@ ssh tp-1a222-14 java -jar /tmp/cordeiro/Slave.jar
 
 Étape 5
 
+Étape 12
+3)
+MAP FINISHED
+Time taken: 4623 ms
+SHUFFLE FINISHED
+Time taken: 6664 ms
+REDUCE FINISHED
+Time taken: 4547 ms
