@@ -3,10 +3,30 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Queue;
+import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Master {
+
+    private static void ExecPhase(String mode, String fileName,
+				  HashMap<String, Integer> pcMap,
+				  ArrayList<Object> threads) throws Exception {
+	for (Map.Entry<String, Integer> entry : pcMap.entrySet()) {
+	    try {
+		ExecSlave es = new ExecSlave(mode, entry.getKey(),
+					     fileName +  (entry.getValue()) + ".txt");
+		threads.add(es);
+		es.start();
+	    }catch(Exception e){}
+	}
+	for(Object obj : threads) {
+	    ExecSlave es = (ExecSlave) obj;
+	    es.join();
+	}
+	threads.clear();
+    }
 
     public static void main(String[] args) {
 	String thisPc = null;
@@ -17,6 +37,10 @@ public class Master {
 	HashMap<String, Integer> pcMap = new HashMap<String, Integer>();
 	FileReader fs = null;
 	FileWriter fw = null;
+	String inputFile = null;
+
+	try{inputFile = args[1];}
+	catch(Exception e){}
 	
 	try{
 	    fs = new FileReader("deploySuccess.txt");
@@ -37,6 +61,67 @@ public class Master {
 	    System.out.println(pcs.size());
 	    threads.clear();
 	    
+	    if(inputFile != null)
+		fs = new FileReader(inputFile);
+	    else
+		fs = new FileReader("input.txt");
+	    br = new BufferedReader(fs);
+
+	    Queue<String> fileLines = new LinkedList<String>();
+	    int fileSize = 0;
+	    while((line = br.readLine()) != null) {
+		fileLines.offer(line);
+		fileSize += line.length();
+	    }
+	    
+	    int splitSize = fileSize/Integer.parseInt(args[0]);
+	    line = fileLines.poll();
+	    int offset = 0;
+	    
+	    for(int i = 0; i < Integer.parseInt(args[0]); i++) {
+		try{
+		    fw = new FileWriter("/tmp/cordeiro/S" +
+					Integer.toString(i) + ".txt");
+		    BufferedWriter bw = new BufferedWriter(fw);
+		    int currentSize = 0;
+		    while(currentSize < splitSize && line != null) {
+			if((currentSize + line.length() - offset) < splitSize) {
+			    bw.write(line, offset, line.length() - offset);
+			    bw.newLine();
+			    bw.flush();
+			    line = fileLines.poll();
+			    currentSize += line.length();
+			    offset = 0;
+			}
+			else {
+			    bw.write(line, offset, splitSize - currentSize);
+			    bw.flush();
+			    String c = null;
+			    try {
+				c = line.substring(offset + splitSize - currentSize,
+						   offset + splitSize - currentSize + 1);
+			    }catch(Exception e){}
+			    offset += splitSize - currentSize + 1;
+			    while(c != null && !c.equals(" ")) {
+				bw.write(c);
+				try{
+				c = line.substring(offset, offset + 1);
+				}catch(Exception e){c = null;}
+				offset++;
+			    }
+			    bw.newLine();
+			    bw.flush();
+			    fw.close();
+			    if(c == null) {
+				line = fileLines.poll();
+				offset = 0;
+			    }
+			    break;
+			}
+		    }
+		}catch(Exception e){}
+	    }
+	    
 	    fw = new FileWriter("machines.txt");
 	    BufferedWriter bw = new BufferedWriter(fw);
 
@@ -49,7 +134,7 @@ public class Master {
 		bw.write(pcName);
 		bw.newLine();
 		i = i + 1;
-		if(i == 3) break;
+		if(i == Integer.parseInt(args[0])) break;
 	    }
 	    bw.flush();
 	    fw.close();
@@ -97,80 +182,4 @@ public class Master {
 	    try{fs.close();}
 	    catch(Exception e){}}
     }
-
-    private static void ExecPhase(String mode, String fileName,
-				  HashMap<String, Integer> pcMap,
-				  ArrayList<Object> threads) throws Exception {
-	for (Map.Entry<String, Integer> entry : pcMap.entrySet()) {
-	    try {
-		ExecSlave es = new ExecSlave(mode, entry.getKey(),
-					     fileName +  (entry.getValue()) + ".txt");
-		threads.add(es);
-		es.start();
-	    }catch(Exception e){}
-	}
-	for(Object obj : threads) {
-	    ExecSlave es = (ExecSlave) obj;
-	    es.join();
-	}
-	threads.clear();
-    }
 }
- 
-class CopySplit extends Thread {
-    String pcName;
-    int i;
-    public CopySplit(String pcName, int i) {
-	this.pcName = pcName;
-	this.i = i;
-    }
-    public void run() {
-	try {
-	    ProcessBuilder pb = new ProcessBuilder("bash", "-c", "ssh " + pcName +
-						   " mkdir -p /tmp/cordeiro/splits ; scp /tmp/cordeiro/S" +  (i) + ".txt " +
-						   pcName + ":/tmp/cordeiro/splits");
-	    Process process = pb.start();
-	    process.waitFor();
-	}catch(Exception e){}
-    }
-}
-
-class ExecSlave extends Thread {
-    String mode, fileName, pcName;
-    public ExecSlave(String mode, String pcName, String fileName) {
-	this.mode = mode;
-	this.pcName = pcName;
-	this.fileName = fileName;
-    }
-    public void run() {
-	boolean flag = true;
-	while(flag) {
-	    try {
-		ProcessBuilder pb = new ProcessBuilder("ssh", pcName, "java", "-jar",
-						       "/tmp/cordeiro/Slave.jar",
-						       mode, fileName);
-		Process process = pb.start();
-	    
-		int exitCode = process.waitFor();
-	    
-		if(exitCode == 0) flag = false;
-	    }catch(Exception e){}
-	}
-	if(mode.equals("0")) {
-	    flag = true;
-	    while(flag) {
-		try{
-		    ProcessBuilder pb = new ProcessBuilder("scp", "machines.txt",
-						       pcName + ":/tmp/cordeiro/");
-
-		    Process process = pb.start();
-
-		    int exitCode = process.waitFor();
-
-		    if(exitCode == 0) flag = false;
-		}catch(Exception e){}
-	    }
-	}
-    }
-}
-
