@@ -3,7 +3,8 @@ import java.io.*;
 import java.net.*;
 
 public class Slave {
-
+    
+    // Main function that executes the right phase according to the argument received.
     public static void main(String[] args) {
 	switch(Integer.parseInt(args[0])) {
 	case 0: mapPhase(args[1]);
@@ -12,10 +13,16 @@ public class Slave {
 	}
     }
 
+    // Executes the map phase.
     private static void mapPhase(String split) {
 	FileReader fr = null;
 	FileWriter fw = null;
 	ProcessBuilder pb = null;
+
+	/* 
+	 * Tries to read the split file then creates the maps directory and a map file.
+	 * On the map file, writes one line for each word on the split file.
+	 */
 	try {
 	    fr = new FileReader("/tmp/cordeiro/splits/" + split);
 	    BufferedReader input = new BufferedReader(fr);
@@ -46,10 +53,12 @@ public class Slave {
 	}
     }
 
+    // Executes the shuffle phase.
     private static void shufflePhase(String map) {
 	FileReader fr = null;
 	FileWriter fw = null;
 	ProcessBuilder pb = null;
+	
 	try {
 	    fr = new FileReader("/tmp/cordeiro/maps/" + map);
 	    BufferedReader input = new BufferedReader(fr);
@@ -61,6 +70,7 @@ public class Slave {
 
 	    HashSet<String> shuffles = new HashSet<String>();
 
+	    // For each line on the map file, copy it to the corresponding shuffle file.
 	    String line;
 	    while((line = input.readLine()) != null) {
 		String[] words = line.split(" ");
@@ -79,7 +89,7 @@ public class Slave {
 	    
 	    fr = new FileReader("/tmp/cordeiro/machines.txt");
 	    input = new BufferedReader(fr);
-
+	    
 	    ArrayList<String> pcs = new ArrayList<String>();
 	    ArrayList<Boolean> createdDir = new ArrayList<Boolean>();
 	    while((line = input.readLine()) != null) {
@@ -87,6 +97,7 @@ public class Slave {
 		createdDir.add(false);
 	    }
 
+	    // Copies the shuffle files to the corresponding machines.
 	    for(String hash : shuffles) {
 		String fileName = "/tmp/cordeiro/shuffles/" + hash +
 		    "-" + InetAddress.getLocalHost().getHostName() + ".txt";
@@ -115,10 +126,12 @@ public class Slave {
 	}
     }
 
+    // Executes the reduce phase.
     private static void reducePhase() {
 	FileReader fr = null;
 	FileWriter fw = null;
 	ProcessBuilder pb = null;
+	
 	try {
 	    pb = new ProcessBuilder("mkdir", "/tmp/cordeiro/reduces");
 	    Process pc = pb.start();
@@ -139,6 +152,10 @@ public class Slave {
 	    
 	    pc.waitFor();
 
+	    /*
+	     * For each file on the shufflesreceived directory, counts the number of
+	     * lines on the file and saves it on the reduce file.
+	     */
 	    String lastHash = null;
 	    for(int i = 0; i < files.size();) {
 		String firstHash = files.get(i).split("-")[0];
