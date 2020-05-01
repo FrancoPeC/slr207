@@ -1,0 +1,51 @@
+<project name="Hadoop" basedir="." default="main">
+  <property name="splits" value="10"/>
+  <property name="input" value=""/>
+  
+  <property name="src.dir"     value="src"/>
+
+  <property name="build.dir"   value="build"/>
+
+  <target name="clean-build">
+    <delete dir="${build.dir}"/>
+    <delete file="machines.txt"/>
+    <delete file="deploySuccess.txt"/>
+    <delete file="Slave.jar"/>
+  </target>
+
+  <target name="compile">
+    <mkdir dir="${build.dir}"/>
+    <javac srcdir="${src.dir}" destdir="${build.dir}"/>
+    <jar destfile="Slave.jar" basedir="${build.dir}">
+      <manifest>
+	<attribute name="Main-Class"
+                   value="Slave"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="run" depends="compile">
+    <java classname="Clean" classpath="${build.dir}"/>
+    <java classname="Deploy" classpath="${build.dir}"/>
+    <java classname="Master" classpath="${build.dir}">
+      <arg line="${splits} ${input}"/>
+    </java>
+  </target>
+
+  <target name="clean" depends="compile">
+    <java classname="Clean" classpath="${build.dir}"/>
+  </target>
+
+  <target name="deploy" depends="compile">
+    <java classname="Deploy" classpath="${build.dir}"/>
+  </target>
+
+  <target name="master" depends="compile">
+    <java classname="Master" classpath="${build.dir}">
+      <arg line="${splits} ${input}"/>
+    </java>
+  </target>
+
+  <target name="main" depends="clean-build,run"/>
+
+</project>

@@ -31,7 +31,7 @@ public class Clean {
 		GetHostName ghn = (GetHostName) obj;
 		ghn.join();
 	    }
-	    System.out.println(pcs.size());
+	    System.out.println("Number of machines found:" + Integer.toString(pcs.size()));
 	    threads = new ArrayList<Object>();
 	    for(String pcName : pcs) {
 		ClearSlave cs = new ClearSlave(pcName);

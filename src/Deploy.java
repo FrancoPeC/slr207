@@ -31,7 +31,7 @@ public class Deploy {
 		GetHostName ghn = (GetHostName) obj;
 		ghn.join();
 	    }
-	    System.out.println(pcs.size());
+	    System.out.println("Number of machines found:" + Integer.toString(pcs.size()));
 	    threads = new ArrayList<Object>();
 	    for(String pcName : pcs) {
 		bw.write(pcName);
