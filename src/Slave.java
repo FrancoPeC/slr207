@@ -40,7 +40,7 @@ public class Slave {
 		String[] words = line.split(" ");
 		for(int i = 0; i < words.length; i++) {
 		    if(!words[i].isBlank()) {
-			output.write(words[i] + " 1");
+			output.write(words[i].toLowerCase() + " 1");
 			output.newLine();
 		    }
 		}
@@ -96,12 +96,13 @@ public class Slave {
 		pcs.add(line);
 		createdDir.add(false);
 	    }
-
+	    ArrayList<CopyShuffle> threads = new ArrayList<CopyShuffle>();
 	    // Copies the shuffle files to the corresponding machines.
 	    for(String hash : shuffles) {
 		String fileName = "/tmp/cordeiro/shuffles/" + hash +
 		    "-" + InetAddress.getLocalHost().getHostName() + ".txt";
 		int machine = Integer.parseInt(hash) % pcs.size();
+		if(Integer.signum(machine) == -1) machine = -machine;
 		if(!createdDir.get(machine)) {
 		    try {
 			pb = new ProcessBuilder("ssh", pcs.get(machine), 
@@ -112,13 +113,14 @@ public class Slave {
 			createdDir.set(machine, true);
 		    }catch(Exception e) {}
 		}
-		try {
-		    pb = new ProcessBuilder("scp", fileName, pcs.get(machine) + ":/tmp/cordeiro/shufflesreceived/");
-		    pc = pb.start();
-		    pc.waitFor();
-		}catch(Exception e) {}
+		CopyShuffle cs = new CopyShuffle(fileName, pcs.get(machine));
+		cs.start();
+		threads.add(cs);
 	    }
-	    
+	    for(CopyShuffle cs : threads) {
+		try{cs.join();}
+		catch(Exception e){}
+	    }
 	}catch(Exception e) {}
 	finally{
 	    try{fr.close(); fw.close();}
@@ -158,8 +160,9 @@ public class Slave {
 	     */
 	    String lastHash = null;
 	    for(int i = 0; i < files.size();) {
-		String firstHash = files.get(i).split("-")[0];
-		System.out.println(firstHash);
+		String firstHash = null;
+		if(files.get(i).charAt(0) == '-') firstHash = "-" + files.get(i).split("-")[1];
+		else firstHash = files.get(i).split("-")[0];
 		String hash = firstHash;
 		String key = null;
 		int count = 0;
@@ -176,7 +179,8 @@ public class Slave {
 		    
 		    i++;
 		    if(i == files.size()) break;
-		    hash = files.get(i).split("-")[0];
+		    if(files.get(i).charAt(0) == '-') hash = "-" + files.get(i).split("-")[1];
+		    else hash = files.get(i).split("-")[0];
 		    }catch(Exception e){}
 		    finally{
 			try{fr.close();}catch(Exception e){}
@@ -194,3 +198,4 @@ public class Slave {
 	}catch(Exception e){}
     }
 }
+

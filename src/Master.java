@@ -3,8 +3,10 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Comparator;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Master {
 
@@ -91,7 +93,7 @@ public class Master {
 	    
 	    int splitSize = (int) (inputFile.length() / numSplits);
 	    FileOutputStream split = null;
-	    for(int i = 0; i < numSplits; i++) {
+	    for(int i = 0; i < numSplits - 1; i++) {
 		try{
 		    split = new FileOutputStream("/tmp/cordeiro/S" + Integer.toString(i) + ".txt");
 		    byte readData[] = new byte[splitSize];
@@ -108,6 +110,15 @@ public class Master {
 		    try{split.close();}catch(Exception e){}
 		}
 	    }
+	    split = new FileOutputStream("/tmp/cordeiro/S" +
+					 Integer.toString(numSplits - 1) + ".txt");
+	    byte readData[] = new byte[splitSize];
+	    int numBytes = inputFile.read(readData);
+	    while(numBytes != -1) {
+		split.write(readData, 0, numBytes);
+		numBytes = inputFile.read(readData);
+	    }
+	    split.close();
 	}catch(Exception e){}
 	finally{
 	    try{inputFile.close();}catch(Exception e){}
@@ -174,10 +185,11 @@ public class Master {
 	    try{fs.close();}
 	    catch(Exception e){}}
 
-	// Collects and prints the number of occurences of each word.
+	// Collects the number of occurences of each word.
+	ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<String, Integer>();
 	try {
 	    for(String pcName : pcList) {
-		GetReduces gr = new GetReduces(pcName);
+		GetReduces gr = new GetReduces(pcName, map);
 		threads.add(gr);
 		gr.start();
 	    }
@@ -187,5 +199,11 @@ public class Master {
 		gr.join();
 	    }
 	}catch(Exception e){}
+
+	// Sorts and prints the number of occurences of each word
+	map.entrySet().stream()
+	    .sorted(ConcurrentHashMap.Entry.comparingByKey())
+	    .sorted(ConcurrentHashMap.Entry.comparingByValue(Comparator.reverseOrder()))
+	    .forEach(x -> System.out.println(x.getKey() + " " + Integer.toString(x.getValue())));
     }
 }
