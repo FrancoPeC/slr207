@@ -164,19 +164,20 @@ public class Slave {
 		if(files.get(i).charAt(0) == '-') firstHash = "-" + files.get(i).split("-")[1];
 		else firstHash = files.get(i).split("-")[0];
 		String hash = firstHash;
-		String key = null;
-		int count = 0;
+		HashMap<String, Integer> map = new HashMap<String, Integer>();
 		while(hash.equals(firstHash)) {
 		    try {
 			fr = new FileReader("/tmp/cordeiro/shufflesreceived/" +
 					    files.get(i));
 			BufferedReader br = new BufferedReader(fr);
-
 			while((line = br.readLine()) != null) {
-			    if(count == 0) key = line.split(" ")[0];
-			    count++;
+			    String words[] = line.split(" ");
+			    Integer current = map.get(words[0]);
+			    if(current == null)
+				map.put(words[0], 1);
+			    else
+				map.replace(words[0], current + 1);
 			}
-		    
 		    i++;
 		    if(i == files.size()) break;
 		    if(files.get(i).charAt(0) == '-') hash = "-" + files.get(i).split("-")[1];
@@ -189,7 +190,8 @@ public class Slave {
 		
 		try {
 		fw = new FileWriter("/tmp/cordeiro/reduces/" + firstHash + ".txt");
-		fw.write(key + " " + Integer.toString(count) + "\n");
+		for(Map.Entry entry : map.entrySet())
+		    fw.write(entry.getKey() + " " + entry.getValue() + "\n");
 		}catch(Exception e) {}
 		finally {
 		    try{fw.close();}catch(Exception e){}

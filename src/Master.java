@@ -119,7 +119,7 @@ public class Master {
 		numBytes = inputFile.read(readData);
 	    }
 	    split.close();
-	}catch(Exception e){}
+	}catch(Exception e){System.out.println("Could not open file"); return;}
 	finally{
 	    try{inputFile.close();}catch(Exception e){}
 	}
